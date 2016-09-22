@@ -5,7 +5,8 @@ var https = require('https')
 // Your first function handler
 module.exports.trevorbot = (event, context, cb) => {
   if (event.body.text.toLowerCase().indexOf('where') > -1) {
-    if (event.body.text.toLowerCase().replace('trevorbot', '').indexOf('trevor') > -1) {
+    if (event.body.text.toLowerCase().replace('trevorbot', '').indexOf('trevor') > -1 ||
+      event.body.user_name.toLowerCase().indexOf('trevor') > -1 && event.body.text.toLowerCase().indexOf(' i') > -1) {
       https.get({ host: 'nomadlist.com', path: '/trevorgerhardt.json'}, (res) => {
         let body = ''
 
@@ -19,7 +20,7 @@ module.exports.trevorbot = (event, context, cb) => {
       cb(null, { text: 'I only know where Trevor is.' })
     }
   } else {
-	  cb(null, { text: 'I don\'t understand, I\'m afraid' })
+	  cb(null, { text: 'I don\'t understand, I\'m afraid :thinking_face:' })
   }
 }
 
