@@ -1,0 +1,24 @@
+{
+  "name": "trevorbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "scripts": {
+    "test": "mocha test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/conveyal/trevorbot.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/conveyal/trevorbot/issues"
+  },
+  "homepage": "https://github.com/conveyal/trevorbot#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.0.2",
+    "nock": "^8.0.0"
+  }
+}
