@@ -55,7 +55,7 @@ module.exports.trevorbot = (event, context, cb) => {
     } else {
       cb(null, { text: 'I only know where Trevor is.' })
     }
-  } else if (text.indexOf('chuck norris') > -1) {
+  } else if (text.indexOf('chuck,norris') > -1) {
     makeRequest(http, 'api.icndb.com', '/jokes/random', (err, data) => {
       if (err) { return cb(null, { text: 'I don\'t feel like doing that right now :pensive:' }) }
       cb(null, { text: data.value.joke })
