@@ -43,7 +43,6 @@ var sanitizeChars = (s) => { return s.replace(/[^ a-zA-Z]/g, '?') }
 // Your first function handler
 module.exports.trevorbot = (event, context, cb) => {
   var text = event.body.text.toLowerCase()
-  console.log(text)
   if (text.indexOf('where') > -1) {
     if (text.replace('trevorbot', '').indexOf('trevor') > -1 ||
       event.body.user_name.toLowerCase().indexOf('trevor') > -1 && text.indexOf(' i') > -1) {
