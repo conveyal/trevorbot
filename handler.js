@@ -12,11 +12,13 @@ var makeRequest = (protocol, host, path, callback) => {
       body += d
     })
     res.on('end', () => {
+      let json = null
       try {
-        callback(null, JSON.parse(body))
+        json = JSON.parse(body)
       } catch (e) {
-        callback('json parse error')
+        return callback(e)
       }
+      callback(null, json)
     })
   })
 
@@ -38,7 +40,7 @@ var makeRequest = (protocol, host, path, callback) => {
   req.end()
 }
 
-var sanitizeChars = (s) => { return s.replace(/[^ a-zA-Z]/g, '?') }
+var sanitizeChars = (s) => { return s.replace(/[^\s\w\.:'"]/g, '?') }
 
 // Your first function handler
 module.exports.trevorbot = (event, context, cb) => {
@@ -58,7 +60,7 @@ module.exports.trevorbot = (event, context, cb) => {
   } else if (text.indexOf('chuck norris') > -1) {
     makeRequest(http, 'api.icndb.com', '/jokes/random', (err, data) => {
       if (err) { return cb(null, { text: 'I don\'t feel like doing that right now :pensive:' }) }
-      cb(null, { text: data.value.joke })
+      cb(null, { text: sanitizeChars(data.value.joke) })
     })
   } else {
     cb(null, { text: 'I don\'t understand, I\'m afraid :thinking_face:' })
