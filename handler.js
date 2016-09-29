@@ -43,6 +43,7 @@ var sanitizeChars = (s) => { return s.replace(/[^ a-zA-Z]/g, '?') }
 // Your first function handler
 module.exports.trevorbot = (event, context, cb) => {
   var text = event.body.text.toLowerCase()
+  console.log(text)
   if (text.indexOf('where') > -1) {
     if (text.replace('trevorbot', '').indexOf('trevor') > -1 ||
       event.body.user_name.toLowerCase().indexOf('trevor') > -1 && text.indexOf(' i') > -1) {
@@ -55,7 +56,7 @@ module.exports.trevorbot = (event, context, cb) => {
     } else {
       cb(null, { text: 'I only know where Trevor is.' })
     }
-  } else if (text.indexOf('chuck,norris') > -1) {
+  } else if (text.indexOf('chuck norris') > -1) {
     makeRequest(http, 'api.icndb.com', '/jokes/random', (err, data) => {
       if (err) { return cb(null, { text: 'I don\'t feel like doing that right now :pensive:' }) }
       cb(null, { text: data.value.joke })
