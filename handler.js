@@ -62,6 +62,8 @@ module.exports.trevorbot = (event, context, cb) => {
       if (err) { return cb(null, { text: 'I don\'t feel like doing that right now :pensive:' }) }
       cb(null, { text: sanitizeChars(data.value.joke) })
     })
+  } else if (text.indexOf('do') > -1 || text.indexOf('are') > -1) {
+    cb(null, { text: Math.random() > 0.5 ? 'yes :thumbsup:' : 'no :thumbsdown:'})
   } else {
     cb(null, { text: 'I don\'t understand, I\'m afraid :thinking_face:' })
   }
