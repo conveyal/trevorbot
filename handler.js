@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 var http = require('http')
 var https = require('https')
@@ -48,11 +48,11 @@ module.exports.trevorbot = (event, context, cb) => {
   if (text.indexOf('where') > -1) {
     if (text.replace('trevorbot', '').indexOf('trevor') > -1 ||
       event.body.user_name.toLowerCase().indexOf('trevor') > -1 && text.indexOf(' i') > -1) {
-      makeRequest(https, 'nomadlist.com', '/trevorgerhardt.json', (err, data) => {
+      makeRequest(https, 'nomadlist.com', '/@trevorgerhardt.json', (err, data) => {
         if (err) { return cb(null, { text: 'I couldn\'t figure that out right now :astonished:' }) }
         var city = sanitizeChars(data.location.now.city)
         var country = sanitizeChars(data.location.now.country)
-        cb(null, { text: `Trevor is in ${city}, ${country} (https://nomadlist.com/trevorgerhardt)` })
+        cb(null, { text: `Trevor is in ${city}, ${country} (https://nomadlist.com/@trevorgerhardt)` })
       })
     } else {
       cb(null, { text: 'I only know where Trevor is.' })
@@ -63,7 +63,7 @@ module.exports.trevorbot = (event, context, cb) => {
       cb(null, { text: sanitizeChars(data.value.joke) })
     })
   } else if (text.indexOf('do') > -1 || text.indexOf('are') > -1) {
-    cb(null, { text: Math.random() > 0.5 ? 'yes :thumbsup:' : 'no :thumbsdown:'})
+    cb(null, { text: Math.random() > 0.5 ? 'yes :thumbsup:' : 'no :thumbsdown:' })
   } else {
     cb(null, { text: 'I don\'t understand, I\'m afraid :thinking_face:' })
   }
