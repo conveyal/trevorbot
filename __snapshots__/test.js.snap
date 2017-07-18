@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`trevorbot problems should handle server connection timeout 1`] = `
+Object {
+  "body": "{\\"text\\":\\"I couldn't figure that out right now :astonished:\\"}",
+  "statusCode": 200,
+}
+`;
+
+exports[`trevorbot problems should handle server response timeout 1`] = `
+Object {
+  "body": "{\\"text\\":\\"I couldn't figure that out right now :astonished:\\"}",
+  "statusCode": 200,
+}
+`;
+
+exports[`trevorbot successes trevor should tell a Chuck Norris joke 1`] = `
+Object {
+  "body": "{\\"text\\":\\"Chuck Norris can install a 64 bit OS on 32 bit machines.\\"}",
+  "statusCode": 200,
+}
+`;
+
+exports[`trevorbot successes unrecognized command should return something 1`] = `
+Object {
+  "body": "{\\"text\\":\\"I don't understand, I'm afraid :thinking_face:\\"}",
+  "statusCode": 200,
+}
+`;
+
+exports[`trevorbot successes where query for non-trevor person should not work 1`] = `
+Object {
+  "body": "{\\"text\\":\\"I only know where Trevor is.\\"}",
+  "statusCode": 200,
+}
+`;
+
+exports[`trevorbot successes where query for trevor should work 1`] = `
+Object {
+  "body": "{\\"text\\":\\"Trevor is in Timbuktu, Mali (https://nomadlist.com/@trevorgerhardt)\\"}",
+  "statusCode": 200,
+}
+`;
