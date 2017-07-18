@@ -1,6 +1,8 @@
 'use strict'
 
+var moment = require('moment-timezone')
 var qs = require('qs')
+var tz = require('tz-lookup')
 
 var http = require('http')
 var https = require('https')
@@ -78,9 +80,11 @@ module.exports.trevorbot = (event, context, cb) => {
           if (err) {
             return respond("I couldn't figure that out right now :astonished:")
           }
-          var city = sanitizeChars(data.location.now.city)
-          var country = sanitizeChars(data.location.now.country)
-          respond(`Trevor is in ${city}, ${country} (https://nomadlist.com/@trevorgerhardt)`)
+          var curLocation = data.location.now
+          var city = sanitizeChars(curLocation.city)
+          var country = sanitizeChars(curLocation.country)
+          var curTime = moment().tz(tz(curLocation.latitude, curLocation.longitude)).format('HH:mm')
+          respond(`Trevor is in ${city}, ${country}.  The current time there is *${curTime}*. (https://nomadlist.com/@trevorgerhardt)`)
         }
       )
     } else {

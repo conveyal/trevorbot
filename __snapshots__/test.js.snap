@@ -37,7 +37,7 @@ Object {
 
 exports[`trevorbot successes where query for trevor should work 1`] = `
 Object {
-  "body": "{\\"text\\":\\"Trevor is in Timbuktu, Mali (https://nomadlist.com/@trevorgerhardt)\\"}",
+  "body": "{\\"text\\":\\"Trevor is in Timbuktu, Mali.  The current time there is *19:31*. (https://nomadlist.com/@trevorgerhardt)\\"}",
   "statusCode": 200,
 }
 `;

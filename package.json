@@ -21,6 +21,8 @@
     "nock": "^8.0.0"
   },
   "dependencies": {
-    "qs": "^6.5.0"
+    "moment-timezone": "^0.5.13",
+    "qs": "^6.5.0",
+    "tz-lookup": "^6.1.1"
   }
 }

@@ -9,7 +9,13 @@ const TIMBUKTU = JSON.stringify({
   location: {
     now: {
       city: 'Timbuktu',
-      country: 'Mali'
+      country: 'Mali',
+      latitude: 17,
+      longitude: -3,
+      epoch_start: 1500249600,
+      epoch_end: 1500854400,
+      date_start: '2017-07-17',
+      date_end: '2017-07-24'
     }
   }
 })
