@@ -3,11 +3,13 @@
 var nock = require('nock')
 var qs = require('qs')
 
-var trevorbot = require('./handler').trevorbot
+var handler = require('./handler')
+handler.setPeopleJson('./people-example.json')
+var trevorbot = handler.trevorbot
 
 const TIMBUKTU = JSON.stringify({
   location: {
-    now: {
+    people: {
       city: 'Timbuktu',
       country: 'Mali',
       latitude: 17,
@@ -36,6 +38,10 @@ function makeQuery (text) {
       user_name: 'test_user'
     })
   }
+}
+
+function timeSafeSnapshot (s) {
+  expect(s.replace(/there is \*\d\d:\d\d\*/, 'there is **')).toMatchSnapshot()
 }
 
 describe('trevorbot', () => {
@@ -100,7 +106,8 @@ describe('trevorbot', () => {
 
       trevorbot(makeQuery('where is Trevor?'), null, (err, result) => {
         expect(err).not.toBeTruthy()
-        expect(result).toMatchSnapshot()
+        const body = JSON.parse(result.body)
+        timeSafeSnapshot(body.text)
         scope.done()
         done()
       })

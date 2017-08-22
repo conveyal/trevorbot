@@ -2,14 +2,14 @@
 
 exports[`trevorbot problems should handle server connection timeout 1`] = `
 Object {
-  "body": "{\\"text\\":\\"I couldn't figure that out right now :astonished:\\"}",
+  "body": "{\\"text\\":\\"I couldn't figure out where Trevor is! :astonished:\\"}",
   "statusCode": 200,
 }
 `;
 
 exports[`trevorbot problems should handle server response timeout 1`] = `
 Object {
-  "body": "{\\"text\\":\\"I couldn't figure that out right now :astonished:\\"}",
+  "body": "{\\"text\\":\\"I couldn't figure out where Trevor is! :astonished:\\"}",
   "statusCode": 200,
 }
 `;
@@ -30,14 +30,9 @@ Object {
 
 exports[`trevorbot successes where query for non-trevor person should not work 1`] = `
 Object {
-  "body": "{\\"text\\":\\"I only know where Trevor is.\\"}",
+  "body": "{\\"text\\":\\"I only know where Trevor and Bob are.\\"}",
   "statusCode": 200,
 }
 `;
 
-exports[`trevorbot successes where query for trevor should work 1`] = `
-Object {
-  "body": "{\\"text\\":\\"Trevor is in Timbuktu, Mali.  The current time there is *19:31*. (https://nomadlist.com/@trevorgerhardt)\\"}",
-  "statusCode": 200,
-}
-`;
+exports[`trevorbot successes where query for trevor should work 1`] = `"Trevor is in Timbuktu, Mali.  The current time there is **. (https://nomadlist.com//@trevorgerhardt.json)"`;
