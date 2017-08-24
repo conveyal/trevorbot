@@ -1,53 +1,143 @@
 'use strict'
 
-var each = require('async-each')
-var moment = require('moment-timezone')
-var qs = require('qs')
-var tz = require('tz-lookup')
+const each = require('async-each')
+const search = require('isomorphic-mapzen-search').search
+const moment = require('moment-timezone')
+const qs = require('qs')
+const tz = require('tz-lookup')
 
-var http = require('http')
-var https = require('https')
+const calendar = require('./google-calendar')
+const util = require('./util')
 
-var makeRequest = (protocol, host, path, callback) => {
-  var req = protocol.get({host, path}, res => {
-    let body = ''
+let credentials
 
-    res.on('data', d => {
-      if (connectTimeout) {
-        clearTimeout(connectTimeout)
+/**
+ * Try to find an all-day event with the person in question happening today
+ *
+ * @param  {Array} events
+ * @param  {Object} person
+ * @param  {Object} cb
+ * @return {string}        String of event if found, otherwise null
+ */
+function findOutOfTownEvent (events, person, cb) {
+  if (!credentials) {
+    credentials = require(credentialsFilename)
+  }
+
+  const now = moment()
+  for (var i = 0; i < events.items.length; i++) {
+    var event = events.items[i]
+    if (event.start.date) {
+      // all day event
+      if (
+        moment(event.start.date).isBefore(now) &&
+        moment(event.end.date).isAfter(now)
+      ) {
+        // all day event is within range
+        // check if summary says person is out of town
+        const outOfOfficePatterns = [
+          new RegExp(`${person.name.toLowerCase()}.*in (.*)`),
+          new RegExp(`${person.name.toLowerCase()} out ((.*))`)
+        ]
+        for (var j = 0; j < outOfOfficePatterns.length; j++) {
+          const match = event.summary.toLowerCase().match(outOfOfficePatterns[j])
+          if (match) {
+            // person is out of town, do geocode to get exact location
+            search({
+              apiKey: credentials.mapzenApiKey,
+              text: match[1]
+            }).then((geojson) => {
+              if (geojson.features.length === 0) {
+                cb(null, `${person.name}'s calendar says they are in ${match[1]}, but I have no idea where that is.  :confused:`)
+              } else {
+                const firstFeature = geojson.features[0]
+                cb(null, getTextForLocation(
+                  person.name,
+                  firstFeature.properties.label,
+                  firstFeature.geometry.coordinates[1],
+                  firstFeature.geometry.coordinates[0]
+                ))
+              }
+            }).catch((err) => {
+              console.error(err)
+              cb(err)
+            })
+            return
+          }
+        }
       }
-      body += d
-    })
-    res.on('end', () => {
-      let json = null
-      try {
-        json = JSON.parse(body)
-      } catch (e) {
-        return callback(e)
-      }
-      callback(null, json)
-    })
-  })
-
-  req.on('socket', socket => {
-    socket.setTimeout(5000)
-    socket.on('timeout', () => {
-      // console.log('socket timeout');
-      req.abort()
-    })
-  })
-
-  const connectTimeout = setTimeout(() => {
-    req.abort()
-  }, 5000)
-
-  req.on('error', callback)
-
-  req.end()
+    }
+  }
+  cb(null, null)
 }
 
-var sanitizeChars = s => {
-  return s.replace(/[^\s\w.:'"]/g, '?')
+/**
+ * Try to find user's location from home data
+ * and if no location, just give up
+ *
+ * @param  {string}   [warningText] possible warning text to append
+ * @param  {Object}   person
+ * @param  {Function} cb
+ */
+function getPersonLocationFromHomeData (warningText, person, cb) {
+  // return home location
+  if (!person.home) {
+    return cb(null, `I have no idea where ${person.name} is. :confused:`)
+  }
+
+  cb(
+    null,
+    (warningText || '') + getTextForLocation(
+      person.name,
+      `${person.home.city}, ${person.home.country}`,
+      person.home.lat,
+      person.home.lon
+    )
+  )
+}
+
+/**
+ * Try to find person's location based on their personal calendar.
+ * If not found, continue to home location queries.
+ *
+ * @param  {Object}   person
+ * @param  {Function} cb
+ */
+function getGoogleCalendarDataForPerson (person, cb) {
+  if (person.calendarId) {
+    // person has a google calendar, see if they're away
+    calendar.getEvents(person.calendarId, (err, events) => {
+      if (err) {
+        console.error(err)
+        return getPersonLocationFromHomeData(
+          `I couldn't load ${person.name}'s calendar, but I'm guessing `,
+          person,
+          cb)
+      }
+
+      // got events, see if they're out of town
+      findOutOfTownEvent(events, person, (err, outOfOfficeEvent) => {
+        if (err) {
+          console.error(err)
+        }
+        if (outOfOfficeEvent) {
+          return cb(null, outOfOfficeEvent)
+        }
+
+        // not out of town, send data about home location
+        getPersonLocationFromHomeData(
+          null,
+          person,
+          cb)
+      })
+    })
+  } else {
+    console.log(`no calendar configured for ${person.name}`)
+    getPersonLocationFromHomeData(
+      `I can't view ${person.name}'s calendar, but I'm guessing `,
+      person,
+      cb)
+  }
 }
 
 /**
@@ -59,46 +149,96 @@ var sanitizeChars = s => {
 function getLocationInfo (person, cb) {
   if (person.nomandlistAccountName) {
     // person is a nomad or has a nomadlist account, look there
-    makeRequest(
-      https,
-      'nomadlist.com',
-      person.nomandlistAccountName,
-      (err, data) => {
-        if (err) {
-          return cb(
-            null,
-            `I couldn't figure out where ${person.name} is! :astonished:`
-          )
-        }
-
-        // console.log(data)
-        var curLocation = data.location.people
-
-        let text = getTextForLocation(
-          person.name,
-          sanitizeChars(curLocation.city),
-          sanitizeChars(curLocation.country),
-          curLocation.latitude,
-          curLocation.longitude
+    util.makeRequest({
+      host: 'nomadlist.com',
+      path: person.nomandlistAccountName,
+      protocol: 'https'
+    }, (err, data) => {
+      if (err) {
+        return cb(
+          null,
+          `I couldn't figure out where ${person.name} is! :astonished:`
         )
-        text += ` (https://nomadlist.com/${person.nomandlistAccountName})`
-        cb(null, text)
       }
-    )
-  } else {
-    // TODO look at Google Calendar
 
-    // return home location
-    cb(
-      null,
-      getTextForLocation(
+      // console.log(data)
+      var curLocation = data.location.people
+
+      let text = getTextForLocation(
         person.name,
-        person.home.city,
-        person.home.country,
-        person.home.lat,
-        person.home.lon
+        `${util.sanitizeChars(curLocation.city)}, ${util.sanitizeChars(curLocation.country)}`,
+        curLocation.latitude,
+        curLocation.longitude
       )
-    )
+      text += ` (https://nomadlist.com/${person.nomandlistAccountName})`
+      cb(null, text)
+    })
+  } else {
+    // send of through chain of Google Calendar, etc
+    getOutOfOfficeEventsForPerson(person, cb)
+  }
+}
+
+let fetchingOutOfOfficeEvents = false
+let fetchedOutOfOfficeEvents = false
+let outOfOfficeEvents
+const queuedOutOfOfficeRequests = []
+
+/**
+ * Make a request to the Google Calendar API to get the out of office calendar
+ * Enqueue all requests and resolve all of them after receiving response.
+ *
+ * @param  {Object}   person
+ * @param  {Function} cb
+ */
+function getOutOfOfficeEventsForPerson (person, cb) {
+  function checkIfOutOfOffice (person, cb) {
+    if (outOfOfficeEvents === -1) {
+      // error getting out-of-office calendar, try next best option
+      return getGoogleCalendarDataForPerson(person, cb)
+    }
+
+    // Look for event
+    findOutOfTownEvent(outOfOfficeEvents, person, (err, outOfOfficeEvent) => {
+      if (err) {
+        console.error(err)
+      }
+      if (outOfOfficeEvent) {
+        return cb(null, outOfOfficeEvent)
+      }
+
+      // No out of office event, look at person's Google Calendar
+      getGoogleCalendarDataForPerson(person, cb)
+    })
+  }
+
+  if (!config.outOfOfficeCalendarId) {
+    return getGoogleCalendarDataForPerson(person, cb)
+  }
+
+  if (!fetchedOutOfOfficeEvents) {
+    if (!fetchingOutOfOfficeEvents) {
+      calendar.getEvents(config.outOfOfficeCalendarId, (err, events) => {
+        fetchedOutOfOfficeEvents = true
+        if (err) {
+          console.error(err)
+          outOfOfficeEvents = -1
+        } else {
+          outOfOfficeEvents = events
+        }
+        checkIfOutOfOffice(person, cb)
+        if (queuedOutOfOfficeRequests.length > 0) {
+          queuedOutOfOfficeRequests.forEach((fn) => {
+            fn()
+          })
+        }
+      })
+      fetchingOutOfOfficeEvents = true
+    } else {
+      queuedOutOfOfficeRequests.push(() => checkIfOutOfOffice(person, cb))
+    }
+  } else {
+    checkIfOutOfOffice(person, cb)
   }
 }
 
@@ -106,22 +246,27 @@ function getLocationInfo (person, cb) {
  * Helper to get create text of person's name and time at their location
  *
  * @param  {string} personName
- * @param  {string} city
- * @param  {string} country
+ * @param  {string} label
  * @param  {number} lat
  * @param  {number} lon
  * @return {string}
  */
-function getTextForLocation (personName, city, country, lat, lon) {
+function getTextForLocation (personName, label, lat, lon) {
   // console.log(personName, city, country, lat, lon)
   const curTime = moment().tz(tz(lat, lon)).format('HH:mm')
-  return `${personName} is in ${city}, ${country}.  The current time there is *${curTime}*.`
+  return `${personName} is in ${label}.  The current time there is *${curTime}*.`
 }
 
-let peopleJsonFilename = './people.json'
+let config
+let configFilename = './config.json'
+let credentialsFilename = './credentials.json'
 
-module.exports.setPeopleJson = (filename) => {
-  peopleJsonFilename = filename
+module.exports.setConfig = (filename) => {
+  configFilename = filename
+}
+
+module.exports.setCredentials = function (filename) {
+  credentialsFilename = filename
 }
 
 // AWS Lambda function handler
@@ -134,9 +279,14 @@ module.exports.trevorbot = (event, context, cb) => {
    */
   function parseContentsResponse (err, contents) {
     if (err) {
+      console.error(err)
       return respond(`I couldn't figure that out right now! :astonished:`)
     }
-    respond(contents.join('\n'))
+    let response = outOfOfficeEvents === -1
+      ? 'There was an error getting the out-of-office calendar, but here\'s my best guess:\n'
+      : ''
+    response += contents.join('\n')
+    respond(response)
   }
 
   function respond (text) {
@@ -167,7 +317,8 @@ module.exports.trevorbot = (event, context, cb) => {
     respond(`I only know where ${allPeople} are.`)
   }
 
-  var people = require(peopleJsonFilename)
+  config = require(configFilename)
+  const people = config.people
 
   var query = qs.parse(event.body)
   var text = query.text.toLowerCase()
@@ -211,11 +362,15 @@ module.exports.trevorbot = (event, context, cb) => {
       unknownPerson()
     }
   } else if (text.indexOf('chuck norris') > -1) {
-    makeRequest(http, 'api.icndb.com', '/jokes/random', (err, data) => {
+    util.makeRequest({
+      host: 'api.icndb.com',
+      path: '/jokes/random',
+      protocol: 'http'
+    }, (err, data) => {
       if (err) {
         return respond("I don't feel like doing that right now :pensive:")
       }
-      respond(sanitizeChars(data.value.joke))
+      respond(util.sanitizeChars(data.value.joke))
     })
   } else if (text.indexOf('do') > -1 || text.indexOf('are') > -1) {
     respond(Math.random() > 0.5 ? 'yes :thumbsup:' : 'no :thumbsdown:')

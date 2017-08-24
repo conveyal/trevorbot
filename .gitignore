@@ -1,3 +1,4 @@
 node_modules
 .serverless
-people.json
+config.json
+credentials.json

@@ -4,7 +4,7 @@ var nock = require('nock')
 var qs = require('qs')
 
 var handler = require('./handler')
-handler.setPeopleJson('./people-example.json')
+handler.setConfig('./config-example.json')
 var trevorbot = handler.trevorbot
 
 const TIMBUKTU = JSON.stringify({

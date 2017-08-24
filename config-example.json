@@ -1,0 +1,15 @@
+{
+  "outOfOfficeCalendarId": "blah-blah@group.calendar.google.com",
+  "people": [{
+    "name": "Trevor",
+    "nomandlistAccountName": "/@trevorgerhardt.json"
+  }, {
+    "name": "Bob",
+    "home": {
+      "city": "Boring, OR",
+      "country": "USA",
+      "lat": 45.431393,
+      "lon": -122.375134
+    }
+  }]
+}

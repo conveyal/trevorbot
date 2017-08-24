@@ -6,7 +6,7 @@ const handler = require('./handler')
 const event = {
   body: qs.stringify({
     user_name: 'Trevor',
-    text: 'Where\'s Trevor?'
+    text: 'Where\'s everyone?'
   })
 }
 
