@@ -4,6 +4,7 @@
     "name": "Trevor",
     "nomandlistAccountName": "/@trevorgerhardt.json"
   }, {
+    "calendarId": "bob@example.com",
     "name": "Bob",
     "home": {
       "city": "Boring, OR",

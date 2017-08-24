@@ -4,7 +4,9 @@ A bot that figures out where a bunch of people are... especially Trevor.  Intend
 
 ### Configuration
 
-Create a `people.json` file based off of the `people-example.json` file.  If a person has a [Nomad List](https://nomadlist.com/) account, be sure to note that.  Otherwise, add home locations.
+Create a `config.json` file based off of the `config-example.json` file.  If a person has a [Nomad List](https://nomadlist.com/) account, be sure to note that.  Otherwise, add home locations.
+
+To use with Google Calendar, you'll need to authorize a user that has view access to others' calendars.  The way I did this was get a refresh_token by using the [Google Calendar API quickstart script](https://developers.google.com/google-apps/calendar/quickstart/nodejs).  Create a `credentials.json` file based off of the `credentials-example.json` file.  Also, add a [mapzen api key](https://mapzen.com/documentation/overview/api-keys/).
 
 ### Deployment
 

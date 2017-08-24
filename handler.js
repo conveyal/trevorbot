@@ -1,7 +1,7 @@
 'use strict'
 
 const each = require('async-each')
-const search = require('isomorphic-mapzen-search').search
+const fetch = require('isomorphic-fetch')
 const moment = require('moment-timezone')
 const qs = require('qs')
 const tz = require('tz-lookup')
@@ -43,25 +43,29 @@ function findOutOfTownEvent (events, person, cb) {
           const match = event.summary.toLowerCase().match(outOfOfficePatterns[j])
           if (match) {
             // person is out of town, do geocode to get exact location
-            search({
-              apiKey: credentials.mapzenApiKey,
+            const url = 'https://search.mapzen.com/v1/search'
+            const query = {
+              api_key: credentials.mapzenApiKey,
               text: match[1]
-            }).then((geojson) => {
-              if (geojson.features.length === 0) {
-                cb(null, `${person.name}'s calendar says they are in ${match[1]}, but I have no idea where that is.  :confused:`)
-              } else {
-                const firstFeature = geojson.features[0]
-                cb(null, getTextForLocation(
-                  person.name,
-                  firstFeature.properties.label,
-                  firstFeature.geometry.coordinates[1],
-                  firstFeature.geometry.coordinates[0]
-                ))
-              }
-            }).catch((err) => {
-              console.error(err)
-              cb(err)
-            })
+            }
+            fetch(`${url}?${qs.stringify(query)}`)
+              .then((res) => res.json())
+              .then((geojson) => {
+                if (geojson.features.length === 0) {
+                  cb(null, `${person.name}'s calendar says they are in ${match[1]}, but I have no idea where that is.  :confused:`)
+                } else {
+                  const firstFeature = geojson.features[0]
+                  cb(null, getTextForLocation(
+                    person.name,
+                    firstFeature.properties.label,
+                    firstFeature.geometry.coordinates[1],
+                    firstFeature.geometry.coordinates[0]
+                  ))
+                }
+              }).catch((err) => {
+                console.error(err)
+                cb(err)
+              })
             return
           }
         }
