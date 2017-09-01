@@ -390,8 +390,8 @@ module.exports.trevorbot = (event, context, cb) => {
       'Tom Cruise', 'a herd of gerbils', 'an angry swarm of bees',
       'a unicorn', 'an unkown force of nature']
 
-    const actions = ['broke', 'successfully negotiated', 'destroyed',
-      'wrote a book about', 'was the first to discover',
+    const actions = ['broke', 'successfully negotiated a treaty with',
+      'destroyed', 'wrote a book about', 'was the first to discover',
       'overhearing a suspicious conversation about']
 
     const things = ['it', 'the Statue of Liberty', 'radioactive sludge',
