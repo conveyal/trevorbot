@@ -261,6 +261,15 @@ function getTextForLocation (personName, label, lat, lon) {
   return `${personName} is in ${label}.  The current time there is *${curTime}*.`
 }
 
+/**
+ * Randomly choose a value from an array
+ * @param  {Array} arr
+ * @return {Mixed}
+ */
+function choice (arr) {
+  return arr[Math.floor(Math.random() * arr.length)]
+}
+
 let config
 let configFilename = './config.json'
 let credentialsFilename = './credentials.json'
@@ -343,7 +352,7 @@ module.exports.trevorbot = (event, context, cb) => {
     } else if (matchedPeople.length > 0) {
       // 1 or more people's locations requested
       each(matchedPeople, getLocationInfo, parseContentsResponse)
-    } else if (text.indexOf(' i') > -1) {
+    } else if (text.match(/\bi\b/i)) {
       // someone is asking where they are
       // figure out who it is
       const userName = query.user_name.toLowerCase()
@@ -356,7 +365,7 @@ module.exports.trevorbot = (event, context, cb) => {
       }
 
       if (!matchedPerson) {
-        return unknownPerson()
+        return respond(`I don't know your whereabouts, ${query.user_name}`)
       }
 
       getLocationInfo(matchedPerson, (err, text) => {
@@ -378,6 +387,19 @@ module.exports.trevorbot = (event, context, cb) => {
     })
   } else if (text.indexOf('do') > -1 || text.indexOf('are') > -1) {
     respond(Math.random() > 0.5 ? 'yes :thumbsup:' : 'no :thumbsdown:')
+  } else if (text.indexOf('why')) {
+    const antagonists = ['I', 'the President of the United States of America',
+      'Tom Cruise', 'a herd of gerbils', 'an angry swarm of bees',
+      'a unicorn', 'an unkown force of nature']
+
+    const actions = ['broke', 'successfully negotiated', 'destroyed',
+      'wrote a book about', 'was the first to discover',
+      'overhearing a suspicious conversation about']
+
+    const things = ['it', 'the Statue of Liberty', 'radioactive sludge',
+      'a helicopter full of spaghetti', 'the office']
+
+    respond(`because ${choice(antagonists)} ${choice(actions)} ${choice(things)}.`)
   } else {
     respond("I don't understand, I'm afraid :thinking_face:")
   }

@@ -2,7 +2,8 @@
   "outOfOfficeCalendarId": "blah-blah@group.calendar.google.com",
   "people": [{
     "name": "Trevor",
-    "nomandlistAccountName": "/@trevorgerhardt.json"
+    "nomandlistAccountName": "/@trevorgerhardt.json",
+    "userName": "trevorgerhardt"
   }, {
     "calendarId": "bob@example.com",
     "name": "Bob",
@@ -11,6 +12,7 @@
       "country": "USA",
       "lat": 45.431393,
       "lon": -122.375134
-    }
+    },
+    "userName": "bob"
   }]
 }
