@@ -385,9 +385,7 @@ module.exports.trevorbot = (event, context, cb) => {
       }
       respond(util.sanitizeChars(data.value.joke))
     })
-  } else if (text.indexOf('do') > -1 || text.indexOf('are') > -1) {
-    respond(Math.random() > 0.5 ? 'yes :thumbsup:' : 'no :thumbsdown:')
-  } else if (text.indexOf('why')) {
+  } else if (text.indexOf('why') > -1) {
     const antagonists = ['I', 'the President of the United States of America',
       'Tom Cruise', 'a herd of gerbils', 'an angry swarm of bees',
       'a unicorn', 'an unkown force of nature']
@@ -400,6 +398,8 @@ module.exports.trevorbot = (event, context, cb) => {
       'a helicopter full of spaghetti', 'the office']
 
     respond(`because ${choice(antagonists)} ${choice(actions)} ${choice(things)}.`)
+  } else if (text.indexOf('do') > -1 || text.indexOf('are') > -1) {
+    respond(Math.random() > 0.5 ? 'yes :thumbsup:' : 'no :thumbsdown:')
   } else {
     respond("I don't understand, I'm afraid :thinking_face:")
   }
