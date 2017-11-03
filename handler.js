@@ -27,7 +27,7 @@ function findOutOfTownEvent (events, person, cb) {
   const now = moment()
   for (var i = 0; i < events.items.length; i++) {
     var event = events.items[i]
-    if (event.start.date) {
+    if (event.start && event.start.date) {
       // all day event
       if (
         moment(event.start.date).isBefore(now) &&
