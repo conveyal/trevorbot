@@ -165,8 +165,7 @@ function getLocationInfo (person, cb) {
         )
       }
 
-      // console.log(data)
-      var curLocation = data.location.people
+      var curLocation = data.location.now
 
       let text = getTextForLocation(
         person.name,
