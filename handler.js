@@ -30,8 +30,8 @@ function findOutOfTownEvent (events, person, cb) {
     if (event.start && event.start.date) {
       // all day event
       if (
-        moment(event.start.date).isBefore(now) &&
-        moment(event.end.date).isAfter(now)
+        moment(event.start.date).isSameOrBefore(now) &&
+        moment(event.end.date).isSameOrAfter(now)
       ) {
         // all day event is within range
         // check if summary says person is out of town

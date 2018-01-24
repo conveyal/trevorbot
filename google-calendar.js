@@ -1,5 +1,6 @@
 const google = require('googleapis')
 const GoogleAuth = require('google-auth-library')
+const moment = require('moment')
 
 const auth = new GoogleAuth()
 
@@ -24,7 +25,7 @@ module.exports.getEvents = function (calendarId, cb) {
   api.events.list({
     auth: oauth2Client,
     calendarId,
-    timeMin: (new Date()).toISOString(),
-    maxResults: 20
+    timeMin: moment().subtract(14, 'days').toISOString(),
+    maxResults: 50
   }, cb)
 }
