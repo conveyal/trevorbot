@@ -37,7 +37,7 @@ function findOutOfTownEvent (events, person, cb) {
         // check if summary says person is out of town
         const outOfOfficePatterns = [
           new RegExp(`${person.name.toLowerCase()}.*in (.*)`),
-          new RegExp(`${person.name.toLowerCase()} out ((.*))`)
+          new RegExp(`${person.name.toLowerCase()} out \\(?([^)]*)\\)?`)
         ]
         for (var j = 0; j < outOfOfficePatterns.length; j++) {
           const match = event.summary.toLowerCase().match(outOfOfficePatterns[j])
